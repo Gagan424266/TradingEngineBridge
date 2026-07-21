@@ -1,4 +1,4 @@
-# TVBridge — TradingView → OMS Order Bridge
+# Trading Engine Bridge — TradingView → OMS Order Bridge
 
 **High-performance C++ webhook gateway** that turns TradingView (or any alert source) signals into real exchange orders on your OMS / CMS trading stack.
 
@@ -10,7 +10,7 @@ Built for brokers, prop desks, and algo teams who want **chart alerts → live o
 
 Most trading desks already use **TradingView** for signals and a separate **OMS/CMS** for execution. Connecting them usually means:
 
-| Pain | Without TVBridge | With TVBridge |
+| Pain | Without Trading Engine Bridge | With Trading Engine Bridge |
 |------|----------------------|-------------------|
 | Latency | Node/Python glue + polling | Native C++ HTTP + binary TCP to CMS |
 | Reliability | Ad-hoc scripts break on deploy | Config-driven daemon, health checks, rotating logs |
@@ -29,7 +29,7 @@ Most trading desks already use **TradingView** for signals and a separate **OMS/
 TradingView alert (JSON)
         │  POST /api/v1/webhook?token=***
         ▼
-   TVBridge (libmicrohttpd)
+   Trading Engine Bridge (libmicrohttpd)
         │  validate → resolve contract → load strategy qty/client
         ▼
    CMS / OMS (binary TCP packet)
@@ -158,7 +158,7 @@ For evaluation: run against a staging CMS + DB, hit `/health` and `/api/v1/webho
 ## Repository layout
 
 ```
-TVBridge/
+TradingEngineBridge/
 ├── src/                 # HTTP, webhook, TCP, JSON, logging
 ├── include/             # Public headers + CMS packet layouts
 ├── databaseManager/   # Postgres access layer

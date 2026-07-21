@@ -10,7 +10,7 @@
 #include "DbStructs.hpp"
 
 /**
- * Singleton class managing PostgreSQL database connections for tvbridge.
+ * Singleton class managing PostgreSQL database connections for trading-engine-bridge.
  * Two connections: NSE (default) and BSE.
  * Strategy/order config always uses NSE DB.
  * Security master queries are routed by exchange.

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(TVBridge VERSION 1.0.0 LANGUAGES CXX)
+project(TradingEngineBridge VERSION 1.0.0 LANGUAGES CXX)
 
 # Include databaseManager
 include_directories(databaseManager/include/)
