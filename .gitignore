@@ -1,0 +1,32 @@
+# Build
+webserver
+*.o
+*.exe
+build/
+cmake-build-*/
+
+# Secrets — never commit
+config.ini
+.env
+*.pem
+*.key
+
+# Runtime
+logs/
+*.log
+*.log.*
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# SQLAPI runtime binaries (install separately; see README)
+gmDatabaseManager/SQLAPI_new/lib/
+gmDatabaseManager/SQLAPI_new/bin/
+gmDatabaseManager/SQLAPI_new/binaries-*.tar.gz
+gmDatabaseManager/SQLAPI_new/samples/
