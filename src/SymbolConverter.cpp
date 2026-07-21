@@ -159,7 +159,7 @@ ResolveResult resolveContractId(const std::string& symbol, const std::string& ex
         return result;
     }
 
-    gmConfigurationMaster* db = gmConfigurationMaster::getInstance();
+    ConfigurationMaster* db = ConfigurationMaster::getInstance();
 
     switch (p.instrument) {
 

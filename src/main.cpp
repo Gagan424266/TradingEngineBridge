@@ -2,7 +2,7 @@
 #include "../include/WebServer.hpp"
 #include "../include/Logger.h"
 #include "../include/ConfigParser.hpp"
-#include "gmConfigurationMaster.hpp"
+#include "ConfigurationMaster.hpp"
 
 int main(int argc, char* argv[]) {
     // Determine config file path
@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
     std::string dbUser     = configParser.getValue("database.username", "");
     std::string dbPassword = configParser.getValue("database.password", "");
 
-    gmConfigurationMaster* dbConfig = gmConfigurationMaster::getInstance();
+    ConfigurationMaster* dbConfig = ConfigurationMaster::getInstance();
     bool nseDbOk = false;
     bool bseDbOk = false;
 

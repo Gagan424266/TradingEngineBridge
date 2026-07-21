@@ -1,5 +1,5 @@
-#ifndef GMCONFIGURATIONMASTER_HPP_INCLUDE
-#define GMCONFIGURATIONMASTER_HPP_INCLUDE
+#ifndef CONFIGURATIONMASTER_HPP_INCLUDE
+#define CONFIGURATIONMASTER_HPP_INCLUDE
 
 #pragma once
 
@@ -7,15 +7,15 @@
 #include <mutex>
 #include <unordered_map>
 #include <vector>
-#include "gmStructs.hpp"
+#include "DbStructs.hpp"
 
 /**
- * Singleton class managing PostgreSQL database connections for gm_webserver.
+ * Singleton class managing PostgreSQL database connections for tvbridge.
  * Two connections: NSE (default) and BSE.
  * Strategy/order config always uses NSE DB.
  * Security master queries are routed by exchange.
  */
-class gmConfigurationMaster
+class ConfigurationMaster
 {
   private:
     bool initialized    = false;
@@ -27,8 +27,8 @@ class gmConfigurationMaster
     std::string dbServerIPBSE, dbNameBSE, dbUserNameBSE, dbPasswordBSE;
     int dbServerPortBSE = 0;
 
-    static gmConfigurationMaster *instance;
-    gmConfigurationMaster();
+    static ConfigurationMaster *instance;
+    ConfigurationMaster();
 
     PostgresDBManager *getDbForExchange(const std::string &exchange) const;
 
@@ -49,9 +49,9 @@ class gmConfigurationMaster
     bool refreshTradingviewStrategyToClientDetailsLocked(bool force);
 
   public:
-    ~gmConfigurationMaster();
+    ~ConfigurationMaster();
 
-    static gmConfigurationMaster *getInstance();
+    static ConfigurationMaster *getInstance();
 
     /**
      * Initializes the primary (NSE) DB connection.

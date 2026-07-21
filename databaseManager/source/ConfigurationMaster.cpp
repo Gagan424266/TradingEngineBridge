@@ -1,4 +1,4 @@
-#include "gmConfigurationMaster.hpp"
+#include "ConfigurationMaster.hpp"
 #include "Logger.h"
 
 #include <cctype>
@@ -6,11 +6,11 @@
 #include <stdexcept>
 #include <vector>
 
-gmConfigurationMaster *gmConfigurationMaster::instance = nullptr;
+ConfigurationMaster *ConfigurationMaster::instance = nullptr;
 
-gmConfigurationMaster::gmConfigurationMaster() {}
+ConfigurationMaster::ConfigurationMaster() {}
 
-gmConfigurationMaster::~gmConfigurationMaster()
+ConfigurationMaster::~ConfigurationMaster()
 {
     if (dbManager != nullptr)
     {
@@ -24,16 +24,16 @@ gmConfigurationMaster::~gmConfigurationMaster()
     }
 }
 
-gmConfigurationMaster *gmConfigurationMaster::getInstance()
+ConfigurationMaster *ConfigurationMaster::getInstance()
 {
     if (instance == nullptr)
     {
-        instance = new gmConfigurationMaster();
+        instance = new ConfigurationMaster();
     }
     return instance;
 }
 
-bool gmConfigurationMaster::initialize(const std::string &ip, int port, const std::string &dbName,
+bool ConfigurationMaster::initialize(const std::string &ip, int port, const std::string &dbName,
                                        const std::string &userName, const std::string &password)
 {
     if (initialized)
@@ -47,7 +47,7 @@ bool gmConfigurationMaster::initialize(const std::string &ip, int port, const st
 
     if (dbServerPort <= 0)
     {
-        LOG_ERROR("gmConfigurationMaster::initialize - invalid port: " + std::to_string(dbServerPort));
+        LOG_ERROR("ConfigurationMaster::initialize - invalid port: " + std::to_string(dbServerPort));
         return false;
     }
 
@@ -55,12 +55,12 @@ bool gmConfigurationMaster::initialize(const std::string &ip, int port, const st
     {
         dbManager   = new PostgresDBManager(dbServerIP, dbServerPort, this->dbName, dbUserName, dbPassword);
         initialized = true;
-        LOG_INFO("gmConfigurationMaster::initialize - connected to "
+        LOG_INFO("ConfigurationMaster::initialize - connected to "
                  + dbServerIP + ":" + std::to_string(dbServerPort) + "/" + this->dbName);
     }
     catch (const std::exception &e)
     {
-        LOG_ERROR("gmConfigurationMaster::initialize - connection failed: " + std::string(e.what()));
+        LOG_ERROR("ConfigurationMaster::initialize - connection failed: " + std::string(e.what()));
     }
 
     // Load TradingView strategy config cache once at startup.
@@ -69,7 +69,7 @@ bool gmConfigurationMaster::initialize(const std::string &ip, int port, const st
         std::lock_guard<std::mutex> lock(cacheMutex);
         if (!refreshTradingviewStrategyToClientDetailsLocked(true))
         {
-            LOG_ERROR("gmConfigurationMaster::initialize - TradingView config cache load failed. "
+            LOG_ERROR("ConfigurationMaster::initialize - TradingView config cache load failed. "
                       "Server startup must abort (missing tradingviewStrategyConfig / tradingviewConfigToStrategy).");
             initialized = false;
             return false;
@@ -79,7 +79,7 @@ bool gmConfigurationMaster::initialize(const std::string &ip, int port, const st
     return initialized;
 }
 
-bool gmConfigurationMaster::initializeBSE(const std::string &ip, int port, const std::string &dbName,
+bool ConfigurationMaster::initializeBSE(const std::string &ip, int port, const std::string &dbName,
                                            const std::string &userName, const std::string &password)
 {
     if (initializedBSE)
@@ -93,7 +93,7 @@ bool gmConfigurationMaster::initializeBSE(const std::string &ip, int port, const
 
     if (dbServerPortBSE <= 0)
     {
-        LOG_ERROR("gmConfigurationMaster::initializeBSE - invalid port: " + std::to_string(dbServerPortBSE));
+        LOG_ERROR("ConfigurationMaster::initializeBSE - invalid port: " + std::to_string(dbServerPortBSE));
         return false;
     }
 
@@ -101,18 +101,18 @@ bool gmConfigurationMaster::initializeBSE(const std::string &ip, int port, const
     {
         dbManagerBSE   = new PostgresDBManager(dbServerIPBSE, dbServerPortBSE, dbNameBSE, dbUserNameBSE, dbPasswordBSE);
         initializedBSE = true;
-        LOG_INFO("gmConfigurationMaster::initializeBSE - connected to "
+        LOG_INFO("ConfigurationMaster::initializeBSE - connected to "
                  + dbServerIPBSE + ":" + std::to_string(dbServerPortBSE) + "/" + dbNameBSE);
     }
     catch (const std::exception &e)
     {
-        LOG_ERROR("gmConfigurationMaster::initializeBSE - connection failed: " + std::string(e.what()));
+        LOG_ERROR("ConfigurationMaster::initializeBSE - connection failed: " + std::string(e.what()));
     }
 
     return initializedBSE;
 }
 
-PostgresDBManager *gmConfigurationMaster::getDbForExchange(const std::string &exchange) const
+PostgresDBManager *ConfigurationMaster::getDbForExchange(const std::string &exchange) const
 {
     if (exchange == "BSE" || exchange == "bse") {
         if (initializedBSE && dbManagerBSE != nullptr)
@@ -122,11 +122,11 @@ PostgresDBManager *gmConfigurationMaster::getDbForExchange(const std::string &ex
     return dbManager;
 }
 
-bool gmConfigurationMaster::refreshTradingviewStrategyToClientDetailsLocked(bool force)
+bool ConfigurationMaster::refreshTradingviewStrategyToClientDetailsLocked(bool force)
 {
     if (!initialized || dbManager == nullptr)
     {
-        LOG_ERROR("gmConfigurationMaster::refreshTradingviewStrategyToClientDetailsLocked - not initialized");
+        LOG_ERROR("ConfigurationMaster::refreshTradingviewStrategyToClientDetailsLocked - not initialized");
         return false;
     }
 
@@ -147,7 +147,7 @@ bool gmConfigurationMaster::refreshTradingviewStrategyToClientDetailsLocked(bool
     auto cmd = dbManager->executeQuery(query);
     if (!cmd)
     {
-        LOG_ERROR("gmConfigurationMaster::refreshTradingviewStrategyToClientDetailsLocked - JOIN query failed");
+        LOG_ERROR("ConfigurationMaster::refreshTradingviewStrategyToClientDetailsLocked - JOIN query failed");
         return false;
     }
 
@@ -182,13 +182,13 @@ bool gmConfigurationMaster::refreshTradingviewStrategyToClientDetailsLocked(bool
     }
     catch (const SAException &e)
     {
-        LOG_ERROR("gmConfigurationMaster::refreshTradingviewStrategyToClientDetailsLocked - SAException: "
+        LOG_ERROR("ConfigurationMaster::refreshTradingviewStrategyToClientDetailsLocked - SAException: "
                   + std::string((const char *)e.ErrText()));
         return false;
     }
     catch (const std::invalid_argument &e)
     {
-        LOG_ERROR("gmConfigurationMaster::refreshTradingviewStrategyToClientDetailsLocked - non-numeric id: "
+        LOG_ERROR("ConfigurationMaster::refreshTradingviewStrategyToClientDetailsLocked - non-numeric id: "
                   + std::string(e.what()));
         return false;
     }
@@ -196,13 +196,13 @@ bool gmConfigurationMaster::refreshTradingviewStrategyToClientDetailsLocked(bool
     next.loaded = true;
 
     tradingviewStrategyToClientDetails = std::move(next);
-    LOG_INFO("gmConfigurationMaster::refreshTradingviewStrategyToClientDetailsLocked - loaded "
+    LOG_INFO("ConfigurationMaster::refreshTradingviewStrategyToClientDetailsLocked - loaded "
              + std::to_string(tradingviewStrategyToClientDetails.nameToDetails.size())
              + " strategy name(s) from JOIN");
     return true;
 }
 
-std::vector<OrderConfigRow> gmConfigurationMaster::getCachedOrderConfigRowsByStrategyName(
+std::vector<OrderConfigRow> ConfigurationMaster::getCachedOrderConfigRowsByStrategyName(
     const std::string &strategyName, int *outStrategyConfigId)
 {
     if (outStrategyConfigId) *outStrategyConfigId = -1;
@@ -221,14 +221,14 @@ std::vector<OrderConfigRow> gmConfigurationMaster::getCachedOrderConfigRowsByStr
     return it->second.orderRows;
 }
 
-SecurityMasterRow gmConfigurationMaster::getSecurityByDatafeedTicker(const std::string &datafeedTicker)
+SecurityMasterRow ConfigurationMaster::getSecurityByDatafeedTicker(const std::string &datafeedTicker)
 {
     SecurityMasterRow result;
     result.contractId = -1;
 
     if (!initialized)
     {
-        LOG_ERROR("gmConfigurationMaster::getSecurityByDatafeedTicker - not initialized");
+        LOG_ERROR("ConfigurationMaster::getSecurityByDatafeedTicker - not initialized");
         return result;
     }
 
@@ -245,11 +245,11 @@ SecurityMasterRow gmConfigurationMaster::getSecurityByDatafeedTicker(const std::
         "WHERE datafeedticker = '" + escaped + "' "
         "ORDER BY contractid ASC LIMIT 1";
 
-    LOG_INFO("gmConfigurationMaster::getSecurityByDatafeedTicker - query: " + query);
+    LOG_INFO("ConfigurationMaster::getSecurityByDatafeedTicker - query: " + query);
     auto cmd = dbManager->executeQuery(query);
     if (!cmd)
     {
-        LOG_ERROR("gmConfigurationMaster::getSecurityByDatafeedTicker - query failed");
+        LOG_ERROR("ConfigurationMaster::getSecurityByDatafeedTicker - query failed");
         return result;
     }
 
@@ -259,19 +259,19 @@ SecurityMasterRow gmConfigurationMaster::getSecurityByDatafeedTicker(const std::
         {
             result.contractId = static_cast<int>(cmd->Field(1).asInt64());
             result.datafeedTicker = cmd->Field(2).asString().GetMultiByteChars();
-            LOG_INFO("gmConfigurationMaster::getSecurityByDatafeedTicker - found contractId="
+            LOG_INFO("ConfigurationMaster::getSecurityByDatafeedTicker - found contractId="
                      + std::to_string(result.contractId) + " datafeedTicker=" + result.datafeedTicker
                      + " for query " + datafeedTicker);
         }
         else
         {
-            LOG_WARN("gmConfigurationMaster::getSecurityByDatafeedTicker - no row found for "
+            LOG_WARN("ConfigurationMaster::getSecurityByDatafeedTicker - no row found for "
                      + datafeedTicker);
         }
     }
     catch (const SAException &e)
     {
-        LOG_ERROR("gmConfigurationMaster::getSecurityByDatafeedTicker - SAException: "
+        LOG_ERROR("ConfigurationMaster::getSecurityByDatafeedTicker - SAException: "
                   + std::string((const char *)e.ErrText()));
     }
 
@@ -281,7 +281,7 @@ SecurityMasterRow gmConfigurationMaster::getSecurityByDatafeedTicker(const std::
 // ────────────────────────────────────────────────────────────────────────────
 // Equity lookup: NSE uses series='EQ', BSE uses instrument_type
 // ────────────────────────────────────────────────────────────────────────────
-SecurityMasterRow gmConfigurationMaster::getSecurityEquity(
+SecurityMasterRow ConfigurationMaster::getSecurityEquity(
     const std::string &symbol, const std::string &exchange)
 {
     SecurityMasterRow result;
@@ -289,14 +289,14 @@ SecurityMasterRow gmConfigurationMaster::getSecurityEquity(
 
     if (!initialized)
     {
-        LOG_ERROR("gmConfigurationMaster::getSecurityEquity - not initialized");
+        LOG_ERROR("ConfigurationMaster::getSecurityEquity - not initialized");
         return result;
     }
 
     PostgresDBManager *db = getDbForExchange(exchange);
     if (db == nullptr)
     {
-        LOG_ERROR("gmConfigurationMaster::getSecurityEquity - " + exchange + " database not connected");
+        LOG_ERROR("ConfigurationMaster::getSecurityEquity - " + exchange + " database not connected");
         return result;
     }
 
@@ -313,11 +313,11 @@ SecurityMasterRow gmConfigurationMaster::getSecurityEquity(
         "AND securitytype in (0,4) "
         "ORDER BY contractid ASC LIMIT 1";
 
-    LOG_INFO("gmConfigurationMaster::getSecurityEquity - query: " + query);
+    LOG_INFO("ConfigurationMaster::getSecurityEquity - query: " + query);
     auto cmd = db->executeQuery(query);
     if (!cmd)
     {
-        LOG_ERROR("gmConfigurationMaster::getSecurityEquity - query failed");
+        LOG_ERROR("ConfigurationMaster::getSecurityEquity - query failed");
         return result;
     }
 
@@ -327,19 +327,19 @@ SecurityMasterRow gmConfigurationMaster::getSecurityEquity(
         {
             result.contractId     = static_cast<int>(cmd->Field(1).asInt64());
             result.datafeedTicker = cmd->Field(2).asString().GetMultiByteChars();
-            LOG_INFO("gmConfigurationMaster::getSecurityEquity - found contractId="
+            LOG_INFO("ConfigurationMaster::getSecurityEquity - found contractId="
                      + std::to_string(result.contractId) + " for " + symbol
                      + " exchange=" + exchange);
         }
         else
         {
-            LOG_WARN("gmConfigurationMaster::getSecurityEquity - no row for "
+            LOG_WARN("ConfigurationMaster::getSecurityEquity - no row for "
                      + symbol + " exchange=" + exchange);
         }
     }
     catch (const SAException &e)
     {
-        LOG_ERROR("gmConfigurationMaster::getSecurityEquity - SAException: "
+        LOG_ERROR("ConfigurationMaster::getSecurityEquity - SAException: "
                   + std::string((const char *)e.ErrText()));
     }
 
@@ -350,7 +350,7 @@ SecurityMasterRow gmConfigurationMaster::getSecurityEquity(
 // Futures lookup by symbol + expiry month + expiry year
 // Uses instrument_type for both NSE (FUTSTK/FUTIDX) and BSE (SF/IF)
 // ────────────────────────────────────────────────────────────────────────────
-SecurityMasterRow gmConfigurationMaster::getSecurityByFuturesLookup(
+SecurityMasterRow ConfigurationMaster::getSecurityByFuturesLookup(
     const std::string &symbol, int expiryMonth, int expiryYear,
     const std::string &exchange)
 {
@@ -359,14 +359,14 @@ SecurityMasterRow gmConfigurationMaster::getSecurityByFuturesLookup(
 
     if (!initialized)
     {
-        LOG_ERROR("gmConfigurationMaster::getSecurityByFuturesLookup - not initialized");
+        LOG_ERROR("ConfigurationMaster::getSecurityByFuturesLookup - not initialized");
         return result;
     }
 
     PostgresDBManager *db = getDbForExchange(exchange);
     if (db == nullptr)
     {
-        LOG_ERROR("gmConfigurationMaster::getSecurityByFuturesLookup - " + exchange + " database not connected");
+        LOG_ERROR("ConfigurationMaster::getSecurityByFuturesLookup - " + exchange + " database not connected");
         return result;
     }
 
@@ -386,11 +386,11 @@ SecurityMasterRow gmConfigurationMaster::getSecurityByFuturesLookup(
         "and securitytype in (1,5) "
         "ORDER BY maturitydate ASC LIMIT 1";
 
-    LOG_INFO("gmConfigurationMaster::getSecurityByFuturesLookup - query: " + query);
+    LOG_INFO("ConfigurationMaster::getSecurityByFuturesLookup - query: " + query);
     auto cmd = db->executeQuery(query);
     if (!cmd)
     {
-        LOG_ERROR("gmConfigurationMaster::getSecurityByFuturesLookup - query failed");
+        LOG_ERROR("ConfigurationMaster::getSecurityByFuturesLookup - query failed");
         return result;
     }
 
@@ -400,19 +400,19 @@ SecurityMasterRow gmConfigurationMaster::getSecurityByFuturesLookup(
         {
             result.contractId     = static_cast<int>(cmd->Field(1).asInt64());
             result.datafeedTicker = cmd->Field(2).asString().GetMultiByteChars();
-            LOG_INFO("gmConfigurationMaster::getSecurityByFuturesLookup - found contractId="
+            LOG_INFO("ConfigurationMaster::getSecurityByFuturesLookup - found contractId="
                      + std::to_string(result.contractId) + " for " + symbol
                      + " " + std::to_string(expiryMonth) + "/" + std::to_string(expiryYear));
         }
         else
         {
-            LOG_WARN("gmConfigurationMaster::getSecurityByFuturesLookup - no row for "
+            LOG_WARN("ConfigurationMaster::getSecurityByFuturesLookup - no row for "
                      + symbol + " " + std::to_string(expiryMonth) + "/" + std::to_string(expiryYear));
         }
     }
     catch (const SAException &e)
     {
-        LOG_ERROR("gmConfigurationMaster::getSecurityByFuturesLookup - SAException: "
+        LOG_ERROR("ConfigurationMaster::getSecurityByFuturesLookup - SAException: "
                   + std::string((const char *)e.ErrText()));
     }
 
@@ -422,7 +422,7 @@ SecurityMasterRow gmConfigurationMaster::getSecurityByFuturesLookup(
 // ────────────────────────────────────────────────────────────────────────────
 // Front-month futures: nearest unexpired futures contract for a symbol
 // ────────────────────────────────────────────────────────────────────────────
-SecurityMasterRow gmConfigurationMaster::getSecurityFrontMonthFutures(const std::string &symbol,
+SecurityMasterRow ConfigurationMaster::getSecurityFrontMonthFutures(const std::string &symbol,
                                                                        const std::string &exchange,
                                                                        int nthMonth)
 {
@@ -431,7 +431,7 @@ SecurityMasterRow gmConfigurationMaster::getSecurityFrontMonthFutures(const std:
 
     if (!initialized)
     {
-        LOG_ERROR("gmConfigurationMaster::getSecurityFrontMonthFutures - not initialized");
+        LOG_ERROR("ConfigurationMaster::getSecurityFrontMonthFutures - not initialized");
         return result;
     }
 
@@ -440,7 +440,7 @@ SecurityMasterRow gmConfigurationMaster::getSecurityFrontMonthFutures(const std:
     PostgresDBManager *db = getDbForExchange(exchange);
     if (db == nullptr)
     {
-        LOG_ERROR("gmConfigurationMaster::getSecurityFrontMonthFutures - " + exchange + " database not connected");
+        LOG_ERROR("ConfigurationMaster::getSecurityFrontMonthFutures - " + exchange + " database not connected");
         return result;
     }
 
@@ -459,11 +459,11 @@ SecurityMasterRow gmConfigurationMaster::getSecurityFrontMonthFutures(const std:
         "and securitytype in (1,5) "
         "ORDER BY maturitydate ASC LIMIT 1 OFFSET " + std::to_string(nthMonth - 1);
 
-    LOG_INFO("gmConfigurationMaster::getSecurityFrontMonthFutures - query: " + query);
+    LOG_INFO("ConfigurationMaster::getSecurityFrontMonthFutures - query: " + query);
     auto cmd = db->executeQuery(query);
     if (!cmd)
     {
-        LOG_ERROR("gmConfigurationMaster::getSecurityFrontMonthFutures - query failed");
+        LOG_ERROR("ConfigurationMaster::getSecurityFrontMonthFutures - query failed");
         return result;
     }
 
@@ -473,18 +473,18 @@ SecurityMasterRow gmConfigurationMaster::getSecurityFrontMonthFutures(const std:
         {
             result.contractId     = static_cast<int>(cmd->Field(1).asInt64());
             result.datafeedTicker = cmd->Field(2).asString().GetMultiByteChars();
-            LOG_INFO("gmConfigurationMaster::getSecurityFrontMonthFutures - found contractId="
+            LOG_INFO("ConfigurationMaster::getSecurityFrontMonthFutures - found contractId="
                      + std::to_string(result.contractId) + " for " + symbol);
         }
         else
         {
-            LOG_WARN("gmConfigurationMaster::getSecurityFrontMonthFutures - no unexpired futures for "
+            LOG_WARN("ConfigurationMaster::getSecurityFrontMonthFutures - no unexpired futures for "
                      + symbol);
         }
     }
     catch (const SAException &e)
     {
-        LOG_ERROR("gmConfigurationMaster::getSecurityFrontMonthFutures - SAException: "
+        LOG_ERROR("ConfigurationMaster::getSecurityFrontMonthFutures - SAException: "
                   + std::string((const char *)e.ErrText()));
     }
 
@@ -495,7 +495,7 @@ SecurityMasterRow gmConfigurationMaster::getSecurityFrontMonthFutures(const std:
 // Options lookup by symbol + maturitydate + optiontype + strike_price
 // strike_price is numeric(20,6) in the DB — integer comparison still works
 // ────────────────────────────────────────────────────────────────────────────
-SecurityMasterRow gmConfigurationMaster::getSecurityByOptionComponents(
+SecurityMasterRow ConfigurationMaster::getSecurityByOptionComponents(
     const std::string &symbol, const std::string &maturityDate,
     const std::string &optionType, int strikePrice,
     const std::string &exchange)
@@ -505,14 +505,14 @@ SecurityMasterRow gmConfigurationMaster::getSecurityByOptionComponents(
 
     if (!initialized)
     {
-        LOG_ERROR("gmConfigurationMaster::getSecurityByOptionComponents - not initialized");
+        LOG_ERROR("ConfigurationMaster::getSecurityByOptionComponents - not initialized");
         return result;
     }
 
     PostgresDBManager *db = getDbForExchange(exchange);
     if (db == nullptr)
     {
-        LOG_ERROR("gmConfigurationMaster::getSecurityByOptionComponents - " + exchange + " database not connected");
+        LOG_ERROR("ConfigurationMaster::getSecurityByOptionComponents - " + exchange + " database not connected");
         return result;
     }
 
@@ -529,11 +529,11 @@ SecurityMasterRow gmConfigurationMaster::getSecurityByOptionComponents(
         "AND strike_price = " + std::to_string(strikePrice) + " "
         "ORDER BY contractid ASC LIMIT 1";
 
-    LOG_INFO("gmConfigurationMaster::getSecurityByOptionComponents - query: " + query);
+    LOG_INFO("ConfigurationMaster::getSecurityByOptionComponents - query: " + query);
     auto cmd = db->executeQuery(query);
     if (!cmd)
     {
-        LOG_ERROR("gmConfigurationMaster::getSecurityByOptionComponents - query failed");
+        LOG_ERROR("ConfigurationMaster::getSecurityByOptionComponents - query failed");
         return result;
     }
 
@@ -543,19 +543,19 @@ SecurityMasterRow gmConfigurationMaster::getSecurityByOptionComponents(
         {
             result.contractId     = static_cast<int>(cmd->Field(1).asInt64());
             result.datafeedTicker = cmd->Field(2).asString().GetMultiByteChars();
-            LOG_INFO("gmConfigurationMaster::getSecurityByOptionComponents - found contractId="
+            LOG_INFO("ConfigurationMaster::getSecurityByOptionComponents - found contractId="
                      + std::to_string(result.contractId) + " for " + symbol + " " + maturityDate
                      + " " + optionType + " " + std::to_string(strikePrice));
         }
         else
         {
-            LOG_WARN("gmConfigurationMaster::getSecurityByOptionComponents - no row for "
+            LOG_WARN("ConfigurationMaster::getSecurityByOptionComponents - no row for "
                      + symbol + " " + maturityDate + " " + optionType + " " + std::to_string(strikePrice));
         }
     }
     catch (const SAException &e)
     {
-        LOG_ERROR("gmConfigurationMaster::getSecurityByOptionComponents - SAException: "
+        LOG_ERROR("ConfigurationMaster::getSecurityByOptionComponents - SAException: "
                   + std::string((const char *)e.ErrText()));
     }
 

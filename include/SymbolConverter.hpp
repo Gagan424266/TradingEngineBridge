@@ -2,7 +2,7 @@
 #define SYMBOL_CONVERTER_HPP
 
 #include <string>
-#include "gmConfigurationMaster.hpp"
+#include "ConfigurationMaster.hpp"
 
 namespace SymbolConverter {
 

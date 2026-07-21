@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16.3)
-project(gmDatabaseManager LANGUAGES CXX)
+project(databaseManager LANGUAGES CXX)
 file(GLOB cppFiles "source/*.cpp")
 
 include_directories(include)

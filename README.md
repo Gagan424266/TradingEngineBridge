@@ -1,4 +1,4 @@
-# GM WebServer — TradingView → OMS Order Bridge
+# TVBridge — TradingView → OMS Order Bridge
 
 **High-performance C++ webhook gateway** that turns TradingView (or any alert source) signals into real exchange orders on your OMS / CMS trading stack.
 
@@ -10,7 +10,7 @@ Built for brokers, prop desks, and algo teams who want **chart alerts → live o
 
 Most trading desks already use **TradingView** for signals and a separate **OMS/CMS** for execution. Connecting them usually means:
 
-| Pain | Without GM WebServer | With GM WebServer |
+| Pain | Without TVBridge | With TVBridge |
 |------|----------------------|-------------------|
 | Latency | Node/Python glue + polling | Native C++ HTTP + binary TCP to CMS |
 | Reliability | Ad-hoc scripts break on deploy | Config-driven daemon, health checks, rotating logs |
@@ -29,7 +29,7 @@ Most trading desks already use **TradingView** for signals and a separate **OMS/
 TradingView alert (JSON)
         │  POST /api/v1/webhook?token=***
         ▼
-   GM WebServer (libmicrohttpd)
+   TVBridge (libmicrohttpd)
         │  validate → resolve contract → load strategy qty/client
         ▼
    CMS / OMS (binary TCP packet)
@@ -104,7 +104,7 @@ sudo apt-get install -y build-essential cmake pkg-config libmicrohttpd-dev
 
 Install **SQLAPI++** from [sqlapi.com](https://www.sqlapi.com/) and place libraries under:
 
-`gmDatabaseManager/SQLAPI_new/lib/` (e.g. `libsqlapi.so`)
+`databaseManager/SQLAPI_new/lib/` (e.g. `libsqlapi.so`)
 
 CMS / OMS shared headers must be available at the paths referenced in `CMakeLists.txt` (or adjust those include paths for your tree).
 
@@ -158,10 +158,10 @@ For evaluation: run against a staging CMS + DB, hit `/health` and `/api/v1/webho
 ## Repository layout
 
 ```
-GM-WebServer/
+TVBridge/
 ├── src/                 # HTTP, webhook, TCP, JSON, logging
 ├── include/             # Public headers + CMS packet layouts
-├── gmDatabaseManager/   # Postgres access layer
+├── databaseManager/   # Postgres access layer
 ├── config.example.ini
 ├── CMakeLists.txt
 └── README.md

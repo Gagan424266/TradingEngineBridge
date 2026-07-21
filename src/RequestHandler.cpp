@@ -189,7 +189,7 @@ enum MHD_Result RequestHandler::handlePostWebhook(struct MHD_Connection* connect
 
     int contractId = -1;
 
-    gmConfigurationMaster* dbConfig = gmConfigurationMaster::getInstance();
+    ConfigurationMaster* dbConfig = ConfigurationMaster::getInstance();
 
     SymbolConverter::ResolveResult resolved =
         SymbolConverter::resolveContractId(symbol, exchange);

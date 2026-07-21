@@ -8,7 +8,7 @@
 
 #pragma pack(push, 1)
 
-// Must match gmMessageHeader in CMS (int32_t length + int16_t messageType = 6 bytes)
+// Must match CmsMessageHeader (OMS) in CMS (int32_t length + int16_t messageType = 6 bytes)
 struct CmsMessageHeader {
     int32_t length;
     int16_t messageType;
@@ -17,14 +17,14 @@ struct CmsMessageHeader {
     CmsMessageHeader() : length(0), messageType(0) {}
 };
 
-// Must match gmCMSMessageType enum in CMS gmApiMessages.hpp
+// Must match CMS message type enum enum in CMS OMS API messages header
 enum CmsMessageType : int16_t {
     CMS_TRADINGVIEW_ORDER = 4,  // CMSMESSAGE_WEBSERVER_ORDER = 4
 };
 
-// Must exactly mirror gmWebServerOrderMessage in CMS gmStructs.hpp (140 bytes)
-// CMS calculates: numOrders = (header.length - 6) / sizeof(gmWebServerOrderMessage)
-// So this struct must be binary-identical to gmWebServerOrderMessage
+// Must exactly mirror OMS WebServerOrder payload in CMS DbStructs.hpp (140 bytes)
+// CMS calculates: numOrders = (header.length - 6) / sizeof(OMS WebServerOrder payload)
+// So this struct must be binary-identical to OMS WebServerOrder payload
 struct WebServerOrderPayload {
     char instrumentId[64];    
     char clientTimestamp[32]; 
@@ -85,7 +85,7 @@ struct WebServerOrderPayload {
 };
 
 // Full packet: CmsMessageHeader (6 bytes) + WebServerOrderPayload (144 bytes) = 150 bytes
-// CMS recv: numOrders = (header.length - 6) / sizeof(gmWebServerOrderMessage)
+// CMS recv: numOrders = (header.length - 6) / sizeof(OMS WebServerOrder payload)
 struct CmsWrappedPacket {
     CmsMessageHeader header;
     WebServerOrderPayload payload;
@@ -108,13 +108,13 @@ struct CmsWrappedPacket {
 
 // ── Incoming packets: CMS → Webserver ────────────────────────────────────────
 
-// Message types CMS sends back (matches MessageType enum in CMS gmApiMessages.hpp)
+// Message types CMS sends back (matches MessageType enum in CMS OMS API messages header)
 enum CmsResponseMessageType : int16_t {
     CMS_RESPONSE_ORDER_UPDATE = 9,   // MessageType::OrderUpdate
     CMS_RESPONSE_ORDER_FILL  = 10,   // MessageType::OrderFill
 };
 
-// Mirrors gmOrderUpdate in CMS gmStructs.hpp (__attribute__((packed)))
+// Mirrors OMS OrderUpdate in CMS DbStructs.hpp (__attribute__((packed)))
 // Field types use fixed-width integers to be portable.
 // long in CMS on Linux-64 = int64_t — same machine, safe.
 #pragma pack(push, 1)
@@ -188,7 +188,7 @@ struct CmsOrderUpdatePayload {
 };
 #pragma pack(pop)
 
-// Mirrors gmOrderFill in CMS gmStructs.hpp (__attribute__((packed)))
+// Mirrors OMS OrderFill in CMS DbStructs.hpp (__attribute__((packed)))
 #pragma pack(push, 1)
 struct CmsOrderFillPayload {
     int32_t  strategyId;

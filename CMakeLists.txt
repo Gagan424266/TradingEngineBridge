@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.14)
-project(WebServer VERSION 1.0.0 LANGUAGES CXX)
+project(TVBridge VERSION 1.0.0 LANGUAGES CXX)
 
-# Include gmDatabaseManager
-include_directories(gmDatabaseManager/include/)
-include_directories(gmDatabaseManager/SQLAPI_new/include/)
+# Include databaseManager
+include_directories(databaseManager/include/)
+include_directories(databaseManager/SQLAPI_new/include/)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -12,15 +12,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(MHD REQUIRED libmicrohttpd)
 
-# gmDatabaseManager subdirectory
-add_subdirectory(gmDatabaseManager)
-target_include_directories(gmDatabaseManager PRIVATE
+# databaseManager subdirectory
+add_subdirectory(databaseManager)
+target_include_directories(databaseManager PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/gmDatabaseManager/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/gmDatabaseManager/SQLAPI_new/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/../CMS/CMS/gmExternal/gmHeaders
-    ${CMAKE_CURRENT_SOURCE_DIR}/../CMS/CMS/gmCore/gmNetworks/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/../CMS/CMS/gmCore/gmUtilities/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/databaseManager/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/databaseManager/SQLAPI_new/include
+    # Optional: add your OMS/CMS shared header paths here if required at compile time
+    # ${CMAKE_CURRENT_SOURCE_DIR}/../oms/include
 )
 
 # Source files
@@ -52,14 +51,14 @@ target_include_directories(webserver
     PRIVATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/gmDatabaseManager/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/databaseManager/include
     ${MHD_INCLUDE_DIRS}
 )
 
 target_link_libraries(webserver PRIVATE ${MHD_LIBRARIES})
-target_link_libraries(webserver PRIVATE gmDatabaseManager)
+target_link_libraries(webserver PRIVATE databaseManager)
 target_link_libraries(webserver PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/gmDatabaseManager/SQLAPI_new/lib/libsqlapi.so
+    ${CMAKE_CURRENT_SOURCE_DIR}/databaseManager/SQLAPI_new/lib/libsqlapi.so
 )
 
 # Enable threading

@@ -6,7 +6,7 @@
 #include <vector>
 #include "JsonHandler.hpp"
 #include "TcpClient.hpp"
-#include "gmConfigurationMaster.hpp"
+#include "ConfigurationMaster.hpp"
 
 class RequestHandler {
 private:
