@@ -26,7 +26,7 @@ logs/
 Thumbs.db
 
 # SQLAPI runtime binaries (install separately; see README)
-gmDatabaseManager/SQLAPI_new/lib/
-gmDatabaseManager/SQLAPI_new/bin/
-gmDatabaseManager/SQLAPI_new/binaries-*.tar.gz
-gmDatabaseManager/SQLAPI_new/samples/
+databaseManager/SQLAPI_new/lib/
+databaseManager/SQLAPI_new/bin/
+databaseManager/SQLAPI_new/binaries-*.tar.gz
+databaseManager/SQLAPI_new/samples/
